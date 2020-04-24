@@ -1,7 +1,7 @@
 {
-  "name": "higlass-pileup",
+  "name": "higlass-vcf",
   "version": "0.2.11",
-  "description": "HiGlass Pileup Track",
+  "description": "HiGlass VCF Track",
   "keywords": [
     "HiGlass",
     "Track"
@@ -16,10 +16,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/higlass/higlass-pileup.git"
+    "url": "git://github.com/higlass/higlass-vcf.git"
   },
   "main": "src/index.js",
-  "unpkg": "dist/higlass-pileup.min.js",
+  "unpkg": "dist/higlass-vcf.min.js",
   "files": [
     "dist"
   ],
@@ -61,13 +61,14 @@
     "prerelease": "rm -rf dist/*; npm run build; zip -r dist.zip dist"
   },
   "dependencies": {
-    "@gmod/bam": "^1.0.21",
+    "@gmod/tabix": "^1.4.4",
+    "@gmod/vcf": "^4.0.1",
     "d3-array": "^2.3.1",
     "d3-dsv": "^1.1.1",
     "d3-request": "^1.0.6",
     "d3-scale": "^3.0.1",
+    "generic-filehandle": "^2.0.2",
     "higlass-register": "^0.1.0",
-    "prettier": "^1.18.2",
-    "threads": "v1.0.0-beta.6"
+    "prettier": "^1.18.2"
   }
 }

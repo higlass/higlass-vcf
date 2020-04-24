@@ -27,7 +27,7 @@
   <meta property="og:url" content="https://github.com/pkerpedjiev/higlass-labelled-points-track" />
   <meta property="og:image" content="https://raw.githubusercontent.com/flekschas/higlass-geojson/master/teaser.jpg" />
 
-  <title>HiGlass Pileup Track</title>
+  <title>HiGlass VCF Track</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/latest/css/bootstrap.min.css">
   <link rel="stylesheet" href="hglib.css">
 
@@ -77,13 +77,16 @@ const testViewConfig =
       "tracks": {
         "top": [
           {
-            "type": "pileup",
+            "type": "vcf",
             "uid": "VMeS7md-QSOM1gy5ALs6Uw",
-            "tilesetUid": "TO2--V9fRoK4yVZxyaBtDQ",
-            "server": "https://resgen.io/api/v1",
             "options": {
               "axisPositionHorizontal": "right",
               "axisLabelFormatting": "normal"
+            },
+            "data": {
+              "type": "vcf",
+              "url": "https://pkerp.s3.amazonaws.com/public/HG002_SVs_Tier1_v0.6.vcf.gz",
+              "chromSizesUrl": "https://resgen.io/api/v1/chrom-sizes/?id=ADfY_RtsQR6oKOMyrq6qhw"
             },
             "width": 866,
             "height": 417
@@ -91,7 +94,7 @@ const testViewConfig =
           {
             "type": "horizontal-chromosome-labels",
             "uid": "cp0z3-MJRBa48mLTOGDAFA",
-            "tilesetUid": "ZpZ8c5JJRUS1J7ZkofcUrg",
+            "tilesetUid": "ADfY_RtsQR6oKOMyrq6qhw",
             "server": "https://resgen.io/api/v1",
             "options": {
               "color": "#808080",

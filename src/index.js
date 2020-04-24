@@ -1,9 +1,9 @@
 import register from 'higlass-register';
 
-import PileupTrack from './PileupTrack';
+import VcfTrack from './VcfTrack';
 
 register({
-  name: 'PileupTrack',
-  track: PileupTrack,
-  config: PileupTrack.config,
+  name: 'VcfTrack',
+  track: VcfTrack,
+  config: VcfTrack.config,
 });

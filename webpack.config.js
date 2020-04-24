@@ -5,7 +5,6 @@ const HtmlWebPackPlugin = require('html-webpack-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const UnminifiedWebpackPlugin = require('unminified-webpack-plugin');
-const ThreadsPlugin = require('threads-plugin');
 
 module.exports = {
   output: {
@@ -123,6 +122,5 @@ module.exports = {
       filename: './index.html',
     }),
     new UnminifiedWebpackPlugin(),
-    new ThreadsPlugin(),
   ],
 };
