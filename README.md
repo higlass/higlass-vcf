@@ -23,14 +23,14 @@ npm install higlass-vcf
 
 The live scripts can be found at:
 
-- https://unpkg.com/higlass-vcf@v0.1.0/dist/higlass-vcf.min.js
+- https://unpkg.com/higlass-vcf@v0.1.1/dist/higlass-vcf.min.js
 
 ### Client
 
 1. Make sure you load this track prior to `hglib.js`. For example:
 
 ```
-<script src="https://unpkg.com/higlass-vcf@v0.1.0/dist/higlass-vcf.min.js"></script>
+<script src="https://unpkg.com/higlass-vcf@v0.1.1/dist/higlass-vcf.min.js"></script>
 <script src="hglib.js"></script>
 <script>
   ...
