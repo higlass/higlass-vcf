@@ -3,7 +3,7 @@ import VCFDataFetcher from './vcf-fetcher';
 const VcfTrack = (HGC, ...args) => {
   if (!new.target) {
     throw new Error(
-      'Uncaught TypeError: Class constructor cannot be invoked without "new"'
+      'Uncaught TypeError: Class constructor cannot be invoked without "new"',
     );
   }
 
@@ -14,6 +14,42 @@ const VcfTrack = (HGC, ...args) => {
       super(context, options);
 
       context.dataFetcher.track = this;
+    }
+
+    calculateVisibleTiles() {
+      const tiles = HGC.utils.trackUtils.calculate1DVisibleTiles(
+        this.tilesetInfo,
+        this._xScale,
+      );
+
+      for (const tile of tiles) {
+        const { tileWidth } = HGC.utils.trackUtils.getTilePosAndDimensions(
+          this.tilesetInfo,
+          tile.join('.'),
+        );
+
+        const DEFAULT_MAX_TILE_WIDTH = 2e5;
+
+        if (
+          tileWidth >
+          (this.tilesetInfo.max_tile_width || DEFAULT_MAX_TILE_WIDTH)
+        ) {
+          this.errorTextText = 'Zoom in to see details';
+          this.drawError();
+          this.animate();
+          return;
+        }
+
+        this.errorTextText = null;
+        this.pBorder.clear();
+        this.drawError();
+        this.animate();
+      }
+      // const { tileX, tileWidth } = getTilePosAndDimensions(
+      //   this.calculateZoomLevel(),
+      // )
+
+      this.setVisibleTiles(tiles);
     }
   }
 
@@ -29,12 +65,8 @@ VcfTrack.config = {
   orientation: '1d-horizontal',
   name: 'VCF Track',
   thumbnail: new DOMParser().parseFromString(icon, 'text/xml').documentElement,
-  availableOptions: [
-
-  ],
-  defaultOptions: {
-
-  }
+  availableOptions: [],
+  defaultOptions: {},
 };
 
 export default VcfTrack;
