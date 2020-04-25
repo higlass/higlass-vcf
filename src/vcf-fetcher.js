@@ -185,7 +185,7 @@ class VCFDataFetcher {
        ChromosomeInfo(chromSizesUrl, resolve)
      });
 
-     console.log('chromInfo', chromInfo);
+     // console.log('chromInfo', chromInfo);
 
     const tbiIndexed = new TabixIndexedFile({
       filehandle: new RemoteFile(this.dataConfig.url),
@@ -193,50 +193,14 @@ class VCFDataFetcher {
     });
 
     const headerText = await tbiIndexed.getHeader();
-    console.log('headerText:', headerText);
+    // console.log('headerText:', headerText);
 
-    // const promises = chromSizesUrl
-    //   ? [bamHeaders[bamUrl], chromSizes[chromSizesUrl]]
-    //   : [bamHeaders[bamUrl]];
+    const TILE_SIZE = 1024;
+    const tbiVCFParser = new VCF({ header: headerText })
 
-    // return Promise.all(promises).then(values => {
-    //   const TILE_SIZE = 1024;
-    //   let chromInfo = null;
+    // console.log('tbiVCFParser', tbiVCFParser);
 
-    //   if (values.length > 1) {
-    //     // we've passed in a chromInfo file
-    //     // eslint-disable-next-line prefer-destructuring
-    //     chromInfo = values[1];
-    //   } else {
-    //     // no chromInfo provided so we have to take it
-    //     // from the bam file index
-    //     const chroms = [];
-    //     for (const { refName, length } of bamFiles[bamUrl].indexToChr) {
-    //       chroms.push([refName, length]);
-    //     }
-
-    //     chroms.sort(natcmp);
-
-    //     chromInfo = parseChromsizesRows(chroms);
-    //   }
-
-    //   chromInfos[chromSizesUrl] = chromInfo;
-
-    //   const retVal = {
-    //     tile_size: TILE_SIZE,
-    //     bins_per_dimension: TILE_SIZE,
-    //     max_zoom: Math.ceil(
-    //       Math.log(chromInfo.totalLength / TILE_SIZE) / Math.log(2)
-    //     ),
-    //     max_width: chromInfo.totalLength,
-    //     min_pos: [0],
-    //     max_pos: [chromInfo.totalLength]
-    //   };
-
-    //   return retVal;
-    // });
-
-    return retVal = {
+    const retVal = {
       tile_size: TILE_SIZE,
       bins_per_dimension: TILE_SIZE,
       max_zoom: Math.ceil(
@@ -246,21 +210,113 @@ class VCFDataFetcher {
       min_pos: [0],
       max_pos: [chromInfo.totalLength]
     };
+
+    this.tbiIndexed =  tbiIndexed
+    this.chromInfo = chromInfo;
+    this.tbiVCFParser = tbiVCFParser;
+    this.tsInfo =  retVal
+
+    console.log('retVal:', retVal);
+    callback(retVal);
+  }
+
+
+  async tile(z, x) {
+    const MAX_TILE_WIDTH = 200000;
+    const tsInfo= this.tsInfo;
+    console.log('tsInfo:', tsInfo);
+    const tileWidth = +tsInfo.max_width / 2 ** +z;
+    const fetched =  [];
+
+    if (tileWidth > MAX_TILE_WIDTH) {
+      // this.errorTextText('Zoomed out too far for this track. Zoomin further to see reads');
+      return [];
+    }
+
+    // get the bounds of the tile
+    let minX = tsInfo.min_pos[0] + x * tileWidth;
+    const maxX = tsInfo.min_pos[0] + (x + 1) * tileWidth;
+
+    const chromInfo = this.chromInfo;
+    const results = [];
+
+    const { chromLengths, cumPositions } = chromInfo;
+
+    for (let i = 0; i < cumPositions.length; i++) {
+      const chromName = cumPositions[i].chr;
+      const chromStart = cumPositions[i].pos;
+
+      const chromEnd = cumPositions[i].pos + chromLengths[chromName];
+
+      if (chromStart <= minX && minX < chromEnd) {
+        // start of the visible region is within this chromosome
+
+        if (maxX > chromEnd) {
+          const  startPos = minX - chromStart
+          const  endPos = chromEnd - chromStart
+
+          await this.tbiIndexed.getLines(chromName,
+            startPos, endPos, line =>
+            fetched.push(this.tbiVCFParser.parseLine(line)),
+          );
+          console.log('sp  1', startPos, endPos);
+          // the visible region extends beyond the end of this chromosome
+          // fetch from the start until the end of the chromosome
+          // continue onto the next chromosome
+          minX = chromEnd;
+        } else {
+          const endPos = Math.ceil(maxX - chromStart);
+          const startPos = Math.floor(minX - chromStart);
+          // the end of the region is within this chromosome
+
+          await this.tbiIndexed.getLines(chromName,
+            startPos, endPos, line =>
+            fetched.push(this.tbiVCFParser.parseLine(line)),
+          );
+          console.log('sp 2', startPos, endPos);
+          // end the loop because we've retrieved the last chromosome
+          break;
+        }
+      }
+    }
+
+    // flatten the array of promises so that it looks like we're
+    // getting one long list of value
+    console.log('fetched:', fetched);
+    return fetched;
   }
 
   fetchTilesDebounced(receivedTiles, tileIds) {
-    // this.track.updateLoadingText();
+    const tiles = {};
 
-    // this.worker.then(tileFunctions => {
-    //   if (this.isServerFetcher) {
-    //     tileFunctions
-    //       .serverFetchTilesDebounced(this.uid, tileIds)
-    //       .then(receivedTiles);
-    //   } else {
-    //     tileFunctions
-    //       .fetchTilesDebounced(this.uid, tileIds)
-    //       .then(receivedTiles);
+    const validTileIds = [];
+    const tilePromises = [];
+
+    for (const tileId of tileIds) {
+      const parts = tileId.split('.');
+      const z = parseInt(parts[0], 10);
+      const x = parseInt(parts[1], 10);
+
+      if (Number.isNaN(x) || Number.isNaN(z)) {
+        console.warn('Invalid tile zoom or position:', z, x);
+        continue;
+      }
+
+
+      // validTileIds.push(tileId);
+      // tilePromises.push(tile(uid, z, x));
+
+      this.tile(z, x);
+    }
+
+    // return Promise.all(tilePromises).then(values => {
+    //   for (let i = 0; i < values.length; i++) {
+    //     const validTileId = validTileIds[i];
+    //     tiles[validTileId] = values[i];
+    //     tiles[validTileId].tilePositionId = validTileId;
     //   }
+
+    //   return tiles;
     // });
   }
 }
