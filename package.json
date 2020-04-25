@@ -1,6 +1,6 @@
 {
   "name": "higlass-vcf",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "HiGlass VCF Track",
   "keywords": [
     "HiGlass",
@@ -68,7 +68,7 @@
     "d3-request": "^1.0.6",
     "d3-scale": "^3.0.1",
     "generic-filehandle": "^2.0.2",
-    "higlass-register": "^0.1.2",
+    "higlass-register": "^0.1.3",
     "prettier": "^1.18.2",
     "slugid": "^2.0.0"
   }
