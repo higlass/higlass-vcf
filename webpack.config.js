@@ -8,8 +8,8 @@ const UnminifiedWebpackPlugin = require('unminified-webpack-plugin');
 
 module.exports = {
   output: {
-    filename: 'higlass-pileup.min.js',
-    library: 'higlass-pileup',
+    filename: 'higlass-vcf.min.js',
+    library: 'higlass-vcf',
     libraryTarget: 'umd',
     path: path.resolve(__dirname, 'dist'),
   },
